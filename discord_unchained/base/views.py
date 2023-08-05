@@ -1,4 +1,10 @@
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
 from .forms import RoomForm
@@ -12,6 +18,59 @@ from .models import Room, Topic
 
 
 # Create your views here.
+def loginPage(request):
+    page = "login"
+
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    if request.method == "POST":
+        username = request.POST.get("username").lower()
+        password = request.POST.get("password")
+
+        try:
+            user = User.objects.get(username=username)
+        except:
+            messages.error(request, "Invalid credentials")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)  # adds token session
+            return redirect("home")
+        else:
+            messages.error(request, "Invalid credentials")
+
+    context = {"page": page}
+    return render(request, "base/login_register.html", context)
+
+
+def logoutUser(request):
+    logout(request)
+    return redirect("home")
+
+
+def registerUser(request):
+    page = "register"
+    form = UserCreationForm()
+
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            user.save()
+            # Login user
+            login(request, user)
+            return redirect("home")
+
+        else:
+            messages.error(request, "Error ocurred during registration")
+
+    context = {"page": page, "form": form}
+    return render(request, "base/login_register.html", context)
+
+
 def home(request):
     q = request.GET.get("q") if request.GET.get("q") != None else ""
     # Filter rooms for query parameter
@@ -40,6 +99,7 @@ def room(request, pk):
     return render(request, "base/room.html", context)
 
 
+@login_required(login_url="login")
 def createRoom(request):
     form = RoomForm()
     if request.method == "POST":
@@ -53,10 +113,14 @@ def createRoom(request):
     return render(request, "base/room_form.html", context)
 
 
+@login_required(login_url="login")
 def updateRoom(request, pk):
     room = Room.objects.get(id=pk)
     # Prefill form with existing values
     form = RoomForm(instance=room)
+
+    if request.user != room.host:
+        return HttpResponse("You are not allowed here")
 
     if request.method == "POST":
         # Replace existing data, instead of adding new room
@@ -69,8 +133,12 @@ def updateRoom(request, pk):
     return render(request, "base/room_form.html", context)
 
 
+@login_required(login_url="login")
 def deleteRoom(request, pk):
     room = Room.objects.get(id=pk)
+
+    if request.user != room.host:
+        return HttpResponse("You are not allowed here")
 
     if request.method == "POST":
         room.delete()
