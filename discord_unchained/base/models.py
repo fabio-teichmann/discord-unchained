@@ -18,7 +18,7 @@ class Room(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)  # NOT NULL = False
     # Active users in the room
-    # participants =
+    participants = models.ManyToManyField(User, related_name="participants", blank=True)
     # Take timestamp whenever model gets updated
     updated = models.DateTimeField(auto_now=True)  # takes timestamp every time
     created = models.DateTimeField(auto_now_add=True)  # takes only initial timestamp
