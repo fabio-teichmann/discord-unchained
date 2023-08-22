@@ -8,3 +8,4 @@ class RoomForm(ModelForm):
         model = Room
         fields = "__all__"  # creates form according to all model fields
         # fields = ["name", "body"] # select specific fields
+        exclude = ["host", "participants"]
