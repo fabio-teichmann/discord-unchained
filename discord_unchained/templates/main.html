@@ -1,9 +1,11 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discord Unchained</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'styles/main.css' %}">
 </head>
 <body>
     {% include 'navbar.html' %}
@@ -16,6 +18,8 @@
     </ul>
 
     {% endif %}
+
+    <img src="{% static 'images/sunflowers.jpeg' %}"/>
     
     {% block content %}
 
