@@ -212,3 +212,21 @@ def deleteMessage(request, pk):
         return redirect("home")
 
     return render(request, "base/delete.html", {"obj": message})
+
+
+@login_required(login_url="login")
+def updateUser(request):
+    user = User.objects.get(id=request.user.id)
+
+    if request.method == "POST":
+        # Replace existing data, instead of adding new room
+        user.name = request.POST.get("username")
+        user.email = request.POST.get("email")
+        user.description = request.POST.get("user_bio")
+
+        user.save()
+
+        return redirect("user-profile", pk=request.user.id)
+
+    context = {}
+    return render(request, "base/update-user.html", context)
