@@ -82,7 +82,7 @@ def home(request):
         | Q(host__username__icontains=q)
     )
 
-    topics = Topic.objects.all()
+    topics = Topic.objects.all()[0:5]
     room_count = rooms.count()
     room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))
 
@@ -228,3 +228,19 @@ def updateUser(request):
 
     context = {"form": form}
     return render(request, "base/update-user.html", context)
+
+
+def topicsPage(request):
+    q = request.GET.get("q") if request.GET.get("q") != None else ""
+    # Filter rooms for query parameter
+    # __icontains is case-insensitive
+    topics = Topic.objects.filter(Q(name__icontains=q))
+
+    context = {"topics": topics}
+    return render(request, "base/topics.html", context)
+
+
+def activityPage(request):
+    room_messages = Message.objects.all()
+    context = {"room_messages": room_messages}
+    return render(request, "base/activity.html", context)
