@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
-from .forms import RoomForm
+from .forms import RoomForm, UserForm
 from .models import Message, Room, Topic
 
 # rooms = [
@@ -217,16 +217,14 @@ def deleteMessage(request, pk):
 @login_required(login_url="login")
 def updateUser(request):
     user = User.objects.get(id=request.user.id)
+    # Prefill with existing information
+    form = UserForm(instance=user)
 
     if request.method == "POST":
-        # Replace existing data, instead of adding new room
-        user.name = request.POST.get("username")
-        user.email = request.POST.get("email")
-        user.description = request.POST.get("user_bio")
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect("user-profile", pk=user.id)
 
-        user.save()
-
-        return redirect("user-profile", pk=request.user.id)
-
-    context = {}
+    context = {"form": form}
     return render(request, "base/update-user.html", context)
