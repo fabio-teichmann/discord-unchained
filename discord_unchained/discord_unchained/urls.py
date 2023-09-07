@@ -19,4 +19,8 @@ from django.urls import include, path
 
 # Will refer to routes from base.urls for any path starting with given
 # path pattern (here "")
-urlpatterns = [path("admin/", admin.site.urls), path("", include("base.urls"))]
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("base.urls")),
+    path("api/", include("base.api.urls")),
+]
