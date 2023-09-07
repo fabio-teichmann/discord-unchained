@@ -1,8 +1,20 @@
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 # For DB table definitions in the form of a Python class that inherits
 # from Django Models (django.db.models.Model)
+
+
+class User(AbstractUser):
+    name = models.CharField(max_length=200, null=True)
+    email = models.EmailField(unique=True)
+    bio = models.TextField(null=True)
+
+    avatar = models.ImageField(null=True, default="avatar.svg")
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
 
 
 class Topic(models.Model):
